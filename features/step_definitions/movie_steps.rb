@@ -14,7 +14,8 @@ end
 Then /I should see "(.*)" before "(.*)"/ do |e1, e2|
   #  ensure that that e1 occurs before e2.
   #  page.content  is the entire content of the page as a string.
-  flunk "Unimplemented"
+  assert page.body =~ /<td>#{e1}<\/td>.*<td>#{e2}<\/td>/m,
+    %Q{Movie "#{e1}" not listed before movie "#{e2}"}
 end
 
 # Make it easier to express checking or unchecking several boxes at once
@@ -39,7 +40,7 @@ Then /I should (not )?see movies with the following ratings: (.*)/ do |knot, rat
   end
 end
 
-#
+# see all of the movies
 Then /I should see all of the movies/ do
   returned_movies_num = page.all("table#movies tbody tr").length
   expected_movies_num = Movie.all.length
