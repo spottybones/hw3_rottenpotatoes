@@ -4,8 +4,8 @@ Given /the following movies exist/ do |movies_table|
   movies_table.hashes.each do |movie|
     # each returned element will be a hash whose key is the table header.
     # you should arrange to add that movie to the database here.
+    Movie.create!(movie)
   end
-  flunk "Unimplemented"
 end
 
 # Make sure that one string (regexp) occurs before or after another one
@@ -25,4 +25,24 @@ When /I (un)?check the following ratings: (.*)/ do |uncheck, rating_list|
   # HINT: use String#split to split up the rating_list, then
   #   iterate over the ratings and reuse the "When I check..." or
   #   "When I uncheck..." steps in lines 89-95 of web_steps.rb
+  rating_list.split(/,\s*/).each do |rating|
+    steps %Q{When I #{uncheck}check "ratings_#{rating}"}
+  end
+end
+
+# see, or not, whether the movies with the specified ratings have been returned
+Then /I should (not )?see movies with the following ratings: (.*)/ do |knot, rating_list|
+  rating_list.split(/,\s*/).each do |rating|
+    Movie.find_all_by_rating(rating).each do |movie|
+      steps %Q{Then I should #{knot}see "#{movie.title}"}
+    end
+  end
+end
+
+#
+Then /I should see all of the movies/ do
+  returned_movies_num = page.all("table#movies tbody tr").length
+  expected_movies_num = Movie.all.length
+  assert returned_movies_num == expected_movies_num,
+    "Expected #{expected_movies_num} movies but found #{returned_movies_num}"
 end
