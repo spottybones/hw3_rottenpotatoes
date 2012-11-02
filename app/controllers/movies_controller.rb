@@ -16,11 +16,11 @@ class MoviesController < ApplicationController
     end
     @all_ratings = Movie.all_ratings
     @selected_ratings = params[:ratings] || session[:ratings] || {}
-    
+
     if @selected_ratings == {}
       @selected_ratings = Hash[@all_ratings.map {|rating| [rating, rating]}]
     end
-    
+
     if params[:sort] != session[:sort] or params[:ratings] != session[:ratings]
       session[:sort] = sort
       session[:ratings] = @selected_ratings
@@ -55,6 +55,15 @@ class MoviesController < ApplicationController
     @movie.destroy
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
+  end
+
+  def similar
+    @subject_movie = Movie.find(params[:id])
+    @movies = Movie.find_all_by_director_of(@subject_movie)
+    if @movies.empty?
+      flash[:notice] = "'#{@subject_movie.title}' has no director info"
+      redirect_to movies_path
+    end
   end
 
 end
